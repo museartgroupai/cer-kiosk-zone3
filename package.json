@@ -1,0 +1,16 @@
+{
+  "name": "cer-kiosk-zone3",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "check": "node --check src/handoff-schema.js && node --check src/handoff-store.js && node --check src/worker.js && node --check public/app.js && node --check public/certificate.js && node --check public/kiosk-bridge.js",
+    "test": "node --test tests/*.test.js",
+    "build": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.157.0"
+  }
+}

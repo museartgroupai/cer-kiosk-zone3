@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f2e8">
+  <meta name="description" content="กรอกชื่อและรับใบประกาศกิจกรรมเรียนรู้เรื่องอาหารและสุขภาพ">
+  <title>รับใบประกาศ | Food & Fit</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <main class="portal-shell">
+    <header class="portal-brand">
+      <span class="brand-seal" aria-hidden="true">F</span>
+      <div>
+        <p class="brand-kicker">FOOD &amp; FIT · CALORIE QUEST</p>
+        <p class="brand-name">กิจกรรมเรียนรู้เรื่องอาหารและสุขภาพ</p>
+      </div>
+    </header>
+
+    <section id="loading" class="panel state-panel" aria-live="polite">
+      <span class="loader" aria-hidden="true"></span>
+      <h1>กำลังเตรียมใบประกาศ</h1>
+      <p>รอสักครู่ กำลังรับตัวละครจาก kiosk</p>
+    </section>
+
+    <section id="errorStep" class="panel state-panel" hidden>
+      <span class="state-icon state-icon-warning" aria-hidden="true">!</span>
+      <h1 id="errorTitle">เปิดข้อมูลไม่สำเร็จ</h1>
+      <p id="errorMessage">กรุณาสแกน QR จาก kiosk อีกครั้ง</p>
+      <button id="rescanButton" class="button button-primary" type="button">สแกน QR ใหม่</button>
+    </section>
+
+    <section id="nameStep" class="panel" hidden>
+      <div class="step-track" aria-label="ขั้นตอนรับใบประกาศ">
+        <span class="step-chip is-current"><b>1</b> กรอกชื่อ</span>
+        <span class="step-line" aria-hidden="true"></span>
+        <span class="step-chip"><b>2</b> รับใบประกาศ</span>
+      </div>
+
+      <div class="welcome-copy">
+        <p class="eyebrow">เก่งมากที่ร่วมกิจกรรม</p>
+        <h1>ใบประกาศของคุณพร้อมแล้ว</h1>
+        <p>พิมพ์ชื่อที่ต้องการให้แสดงบนใบประกาศ</p>
+      </div>
+
+      <div class="participant-card">
+        <div class="portrait-frame">
+          <img id="characterPreview" alt="ตัวละครที่คุณสร้างจาก kiosk">
+        </div>
+        <div class="result-summary">
+          <span class="summary-label">ผลกิจกรรมวันนี้</span>
+          <div><strong id="energyValue">—</strong><span> kcal</span></div>
+          <div><strong id="groupsValue">—</strong><span> จากอาหาร 5 หมู่</span></div>
+        </div>
+      </div>
+
+      <form id="nameForm" class="name-form" novalidate>
+        <label for="recipientName">ชื่อบนใบประกาศ</label>
+        <input id="recipientName" name="recipientName" type="text" inputmode="text" autocomplete="name" enterkeyhint="done" maxlength="60" placeholder="เช่น เด็กชายต้นกล้า" aria-describedby="nameHint nameError">
+        <p id="nameHint" class="field-hint">ใช้ชื่อจริงหรือชื่อเล่นก็ได้ ไม่เกิน 60 ตัวอักษร</p>
+        <p id="nameError" class="field-error" role="alert" hidden></p>
+        <button id="confirmNameButton" class="button button-primary" type="submit">ยืนยันชื่อและดูใบประกาศ</button>
+      </form>
+
+      <p class="privacy-note"><span aria-hidden="true">🔒</span> ชื่อจะอยู่ในโทรศัพท์ของคุณ ไม่ส่งกลับไปยัง kiosk</p>
+    </section>
+
+    <section id="previewStep" class="panel preview-panel" hidden>
+      <div class="step-track" aria-label="ขั้นตอนรับใบประกาศ">
+        <span class="step-chip is-done"><b>✓</b> กรอกชื่อ</span>
+        <span class="step-line is-done" aria-hidden="true"></span>
+        <span class="step-chip is-current"><b>2</b> รับใบประกาศ</span>
+      </div>
+      <div class="preview-heading">
+        <p class="eyebrow">เรียบร้อย</p>
+        <h1>ใบประกาศพร้อมแล้ว</h1>
+        <p id="previewGreeting">บันทึกเก็บไว้หรือแชร์ให้ครอบครัวได้เลย</p>
+      </div>
+      <img id="certificatePreview" class="certificate-preview" alt="ภาพใบประกาศของคุณ">
+      <div class="action-stack">
+        <button id="downloadButton" class="button button-primary" type="button">ดาวน์โหลดภาพใบประกาศ</button>
+        <button id="pdfButton" class="button button-secondary" type="button">พิมพ์หรือบันทึกเป็น PDF</button>
+        <button id="shareButton" class="button button-secondary" type="button">แชร์ใบประกาศ</button>
+        <button id="editNameButton" class="button button-quiet" type="button">แก้ไขชื่อ</button>
+      </div>
+      <p id="actionStatus" class="action-status" role="status" aria-live="polite"></p>
+      <p class="privacy-note">ใบประกาศสร้างในเบราว์เซอร์นี้ ชื่อไม่ได้ถูกส่งไปเก็บบนเว็บไซต์</p>
+    </section>
+
+    <footer class="portal-footer">
+      <span>การเรียนรู้เรื่องอาหารและสุขภาพ</span>
+      <span>ไม่มีการสมัครสมาชิก</span>
+    </footer>
+  </main>
+  <img id="printSheet" class="print-sheet" alt="ใบประกาศสำหรับพิมพ์หรือบันทึกเป็น PDF">
+</body>
+</html>

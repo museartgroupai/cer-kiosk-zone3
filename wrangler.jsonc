@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cer-kiosk-zone3",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-11-04",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+    "not_found_handling": "single-page-application"
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "HANDOFFS",
+        "class_name": "HandoffStore"
+      }
+    ]
+  },
+  "exports": {
+    "HandoffStore": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
+  }
+}
