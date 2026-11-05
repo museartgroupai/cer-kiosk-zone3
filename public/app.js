@@ -179,11 +179,11 @@ export function bootCertificatePortal(elements = getElements()) {
     if (!certificateBlob) return;
     const link = document.createElement('a');
     link.href = certificateUrl;
-    link.download = 'ใบประกาศ_' + safeFilename(issuedName) + '.png';
+    link.download = 'เกียรติบัตร_' + safeFilename(issuedName) + '.png';
     document.body.append(link);
     link.click();
     link.remove();
-    elements.status.textContent = 'ดาวน์โหลดภาพใบประกาศแล้ว';
+    elements.status.textContent = 'ดาวน์โหลดเกียรติบัตรแล้ว';
   });
 
   elements.pdf.addEventListener('click', () => {
@@ -194,12 +194,12 @@ export function bootCertificatePortal(elements = getElements()) {
 
   elements.share.addEventListener('click', async () => {
     if (!certificateBlob) return;
-    const filename = 'ใบประกาศ_' + safeFilename(issuedName) + '.png';
+    const filename = 'เกียรติบัตร_' + safeFilename(issuedName) + '.png';
     try {
       const file = new File([certificateBlob], filename, { type: 'image/png' });
       if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
-        await navigator.share({ files: [file], title: 'ใบประกาศกิจกรรมอาหารและสุขภาพ' });
-        elements.status.textContent = 'แชร์ใบประกาศแล้ว';
+        await navigator.share({ files: [file], title: 'เกียรติบัตรกิจกรรมอาหารและสุขภาพ' });
+        elements.status.textContent = 'แชร์เกียรติบัตรแล้ว';
       } else {
         elements.download.click();
         elements.status.textContent = 'เบราว์เซอร์นี้ไม่รองรับเมนูแชร์ จึงดาวน์โหลดภาพให้แทน';

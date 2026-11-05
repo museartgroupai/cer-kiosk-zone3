@@ -87,3 +87,15 @@ test('certificate uses both official logos and current Bangkok date', async () =
   assert.match(script, /Asia\/Bangkok/);
   assert.doesNotMatch(script, /signature scribble/i);
 });
+
+
+test('certificate background is text-free and signature-free; center and date render dynamically', async () => {
+  const source = await readFile(new URL('../public/certificate.js', import.meta.url), 'utf8');
+  const bg = await readFile(new URL('../public/certificate-background.webp', import.meta.url));
+  assert.ok(bg.length > 1000);
+  assert.match(source, /certificate-background\.webp/);
+  assert.match(source, /ศูนย์วิทยาศาสตร์เพื่อการศึกษาขอนแก่น/);
+  assert.match(source, /'ให้ไว้ ณ วันที่ ' \+ date/);
+  assert.doesNotMatch(source, /'ผู้จัดกิจกรรม'/);
+  assert.doesNotMatch(source, /'ผู้อำนวยการ'/);
+});
