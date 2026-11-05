@@ -69,3 +69,21 @@ test('kiosk bridge posts only the portrait and activity summary and returns a QR
     globalThis.fetch = previousFetch;
   }
 });
+
+test('certificate is finalized once without an edit-name action', async () => {
+  const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
+  const script = await readFile(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(html, /id="editNameButton"/);
+  assert.match(html, /id="confirmNameDialog"/);
+  assert.match(html, /ยืนยันและออกเกียรติบัตร/);
+  assert.match(script, /finalized = true/);
+  assert.match(script, /elements\.name\.disabled = true/);
+});
+
+test('certificate uses both official logos and current Bangkok date', async () => {
+  const script = await readFile(new URL('../public/certificate.js', import.meta.url), 'utf8');
+  assert.match(script, /learning-encouragement\.webp/);
+  assert.match(script, /science-education\.webp/);
+  assert.match(script, /Asia\/Bangkok/);
+  assert.doesNotMatch(script, /signature scribble/i);
+});

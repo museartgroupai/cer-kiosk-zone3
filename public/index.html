@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f5f2e8">
+  <meta name="theme-color" content="#f4f7fb">
   <meta name="description" content="กรอกชื่อและรับใบประกาศกิจกรรมเรียนรู้เรื่องอาหารและสุขภาพ">
-  <title>รับใบประกาศ | Food & Fit</title>
+  <title>เกียรติบัตร | Food & Fit</title>
   <link rel="icon" href="/logos/learning-encouragement.webp" type="image/webp">
   <link rel="stylesheet" href="/styles.css">
   <script type="module" src="/app.js"></script>
@@ -45,8 +45,8 @@
 
       <div class="welcome-copy">
         <p class="eyebrow">เก่งมากที่ร่วมกิจกรรม</p>
-        <h1>ใบประกาศของคุณพร้อมแล้ว</h1>
-        <p>พิมพ์ชื่อที่ต้องการให้แสดงบนใบประกาศ</p>
+        <h1>เกียรติบัตรของคุณใกล้พร้อมแล้ว</h1>
+        <p>ตรวจสอบการสะกดชื่อให้ถูกต้องก่อนออกเกียรติบัตร</p>
       </div>
 
       <div class="participant-card">
@@ -64,11 +64,22 @@
         <label for="recipientName">ชื่อบนใบประกาศ</label>
         <input id="recipientName" name="recipientName" type="text" inputmode="text" autocomplete="name" enterkeyhint="done" maxlength="60" placeholder="เช่น เด็กชายต้นกล้า" aria-describedby="nameHint nameError">
         <p id="nameHint" class="field-hint">ใช้ชื่อจริงหรือชื่อเล่นก็ได้ ไม่เกิน 60 ตัวอักษร</p>
+        <p class="name-lock-note">เมื่อยืนยันแล้วจะไม่สามารถย้อนกลับมาเปลี่ยนชื่อได้</p>
         <p id="nameError" class="field-error" role="alert" hidden></p>
-        <button id="confirmNameButton" class="button button-primary" type="submit">ยืนยันชื่อและดูใบประกาศ</button>
+        <button id="confirmNameButton" class="button button-primary" type="submit">ตรวจสอบและยืนยันชื่อ</button>
       </form>
 
-      <p class="privacy-note"><span aria-hidden="true">🔒</span> ชื่อจะอยู่ในโทรศัพท์ของคุณ ไม่ส่งกลับไปยัง kiosk</p>
+      <dialog id="confirmNameDialog" class="confirm-dialog" aria-labelledby="confirmDialogTitle" aria-describedby="confirmDialogHint">
+        <p class="eyebrow">ยืนยันครั้งสุดท้าย</p>
+        <h2 id="confirmDialogTitle">ตรวจสอบชื่อบนเกียรติบัตร</h2>
+        <p id="confirmedName" class="confirm-name"></p>
+        <p id="confirmDialogHint" class="confirm-description">หลังจากออกเกียรติบัตรแล้ว จะไม่สามารถย้อนกลับมาแก้ไขชื่อได้</p>
+        <div class="confirm-actions">
+          <button id="cancelNameButton" class="button button-secondary" type="button">กลับไปตรวจสอบ</button>
+          <button id="finalizeNameButton" class="button button-primary" type="button">ยืนยันและออกเกียรติบัตร</button>
+        </div>
+      </dialog>
+      <p class="privacy-note">ข้อมูลชื่ออยู่บนอุปกรณ์ของคุณเท่านั้น ไม่ส่งกลับไปยัง kiosk</p>
     </section>
 
     <section id="previewStep" class="panel preview-panel" hidden>
@@ -79,18 +90,17 @@
       </div>
       <div class="preview-heading">
         <p class="eyebrow">เรียบร้อย</p>
-        <h1>ใบประกาศพร้อมแล้ว</h1>
+        <h1>เกียรติบัตรพร้อมแล้ว</h1>
         <p id="previewGreeting">บันทึกเก็บไว้หรือแชร์ให้ครอบครัวได้เลย</p>
       </div>
-      <img id="certificatePreview" class="certificate-preview" alt="ภาพใบประกาศของคุณ">
+      <img id="certificatePreview" class="certificate-preview" alt="ภาพเกียรติบัตรของคุณ">
       <div class="action-stack">
         <button id="downloadButton" class="button button-primary" type="button">ดาวน์โหลดภาพใบประกาศ</button>
         <button id="pdfButton" class="button button-secondary" type="button">พิมพ์หรือบันทึกเป็น PDF</button>
         <button id="shareButton" class="button button-secondary" type="button">แชร์ใบประกาศ</button>
-        <button id="editNameButton" class="button button-quiet" type="button">แก้ไขชื่อ</button>
-      </div>
+              </div>
       <p id="actionStatus" class="action-status" role="status" aria-live="polite"></p>
-      <p class="privacy-note">ใบประกาศสร้างในเบราว์เซอร์นี้ ชื่อไม่ได้ถูกส่งไปเก็บบนเว็บไซต์</p>
+      <p class="privacy-note">ออกเกียรติบัตรเรียบร้อยแล้ว · ไม่สามารถแก้ไขชื่อย้อนหลังได้</p>
     </section>
 
     <footer class="portal-footer">
@@ -98,6 +108,6 @@
       <span>ไม่มีการสมัครสมาชิก</span>
     </footer>
   </main>
-  <img id="printSheet" class="print-sheet" alt="ใบประกาศสำหรับพิมพ์หรือบันทึกเป็น PDF">
+  <img id="printSheet" class="print-sheet" alt="เกียรติบัตรสำหรับพิมพ์หรือบันทึกเป็น PDF">
 </body>
 </html>

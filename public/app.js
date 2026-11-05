@@ -42,7 +42,10 @@ function getElements() {
     download: document.querySelector('#downloadButton'),
     pdf: document.querySelector('#pdfButton'),
     share: document.querySelector('#shareButton'),
-    edit: document.querySelector('#editNameButton'),
+    confirmDialog: document.querySelector('#confirmNameDialog'),
+    confirmedName: document.querySelector('#confirmedName'),
+    cancelName: document.querySelector('#cancelNameButton'),
+    finalizeName: document.querySelector('#finalizeNameButton'),
     status: document.querySelector('#actionStatus')
   };
 }
@@ -69,6 +72,9 @@ export function bootCertificatePortal(elements = getElements()) {
   let payload = null;
   let certificateBlob = null;
   let certificateUrl = '';
+  let finalized = false;
+  let generating = false;
+  let issuedName = '';
 
   const releaseCertificateUrl = () => {
     if (certificateUrl) URL.revokeObjectURL(certificateUrl);
@@ -109,8 +115,10 @@ export function bootCertificatePortal(elements = getElements()) {
     showError(elements, 'พร้อมสแกนใหม่', 'เปิดกล้องมือถือแล้วสแกน QR ที่แสดงบน kiosk');
   });
 
-  elements.form.addEventListener('submit', async event => {
+  // The visitor may correct the spelling only before the final confirmation.
+  elements.form.addEventListener('submit', event => {
     event.preventDefault();
+    if (finalized || generating || !payload) return;
     const name = normalizeRecipientName(elements.name.value);
     if (!name) {
       elements.nameError.textContent = 'กรุณาพิมพ์ชื่อบนใบประกาศ';
@@ -118,25 +126,52 @@ export function bootCertificatePortal(elements = getElements()) {
       elements.name.focus();
       return;
     }
-    if (!payload) return;
     elements.nameError.hidden = true;
-    setBusy(elements.confirm, true, 'กำลังจัดทำใบประกาศ…', 'ยืนยันชื่อและดูใบประกาศ');
+    elements.confirmedName.textContent = name;
+    elements.confirmDialog.showModal();
+  });
+
+  elements.cancelName.addEventListener('click', () => {
+    if (!generating) elements.confirmDialog.close();
+  });
+
+  elements.finalizeName.addEventListener('click', async () => {
+    if (finalized || generating || !payload) return;
+    const name = normalizeRecipientName(elements.name.value);
+    if (!name) {
+      elements.confirmDialog.close();
+      elements.nameError.textContent = 'กรุณาพิมพ์ชื่อบนใบประกาศ';
+      elements.nameError.hidden = false;
+      return;
+    }
+    generating = true;
+    elements.confirmDialog.close();
+    setBusy(elements.confirm, true, 'กำลังออกเกียรติบัตร…', 'ตรวจสอบและยืนยันชื่อ');
     try {
-      certificateBlob = await createCertificateBlob(payload, name);
+      // Only transition to finalized after a PNG was rendered successfully.
+      const blob = await createCertificateBlob(payload, name);
+      certificateBlob = blob;
       releaseCertificateUrl();
       certificateUrl = URL.createObjectURL(certificateBlob);
       elements.certificate.src = certificateUrl;
       elements.printSheet.src = certificateUrl;
-      elements.greeting.textContent = 'ใบประกาศสำหรับ ' + name + ' พร้อมบันทึกแล้ว';
+      issuedName = name;
+      finalized = true;
+      elements.name.value = name;
+      elements.name.readOnly = true;
+      elements.name.disabled = true;
+      elements.confirm.disabled = true;
+      elements.greeting.textContent = 'เกียรติบัตรสำหรับ ' + name + ' พร้อมบันทึกแล้ว';
       elements.nameStep.hidden = true;
       elements.previewStep.hidden = false;
       elements.status.textContent = '';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-      elements.nameError.textContent = error.message || 'สร้างใบประกาศไม่สำเร็จ กรุณาลองอีกครั้ง';
+      elements.nameError.textContent = error.message || 'สร้างเกียรติบัตรไม่สำเร็จ กรุณาลองอีกครั้ง';
       elements.nameError.hidden = false;
     } finally {
-      setBusy(elements.confirm, false, '', 'ยืนยันชื่อและดูใบประกาศ');
+      generating = false;
+      if (!finalized) setBusy(elements.confirm, false, '', 'ตรวจสอบและยืนยันชื่อ');
     }
   });
 
@@ -144,7 +179,7 @@ export function bootCertificatePortal(elements = getElements()) {
     if (!certificateBlob) return;
     const link = document.createElement('a');
     link.href = certificateUrl;
-    link.download = 'ใบประกาศ_' + safeFilename(elements.name.value) + '.png';
+    link.download = 'ใบประกาศ_' + safeFilename(issuedName) + '.png';
     document.body.append(link);
     link.click();
     link.remove();
@@ -159,7 +194,7 @@ export function bootCertificatePortal(elements = getElements()) {
 
   elements.share.addEventListener('click', async () => {
     if (!certificateBlob) return;
-    const filename = 'ใบประกาศ_' + safeFilename(elements.name.value) + '.png';
+    const filename = 'ใบประกาศ_' + safeFilename(issuedName) + '.png';
     try {
       const file = new File([certificateBlob], filename, { type: 'image/png' });
       if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
@@ -174,14 +209,16 @@ export function bootCertificatePortal(elements = getElements()) {
     }
   });
 
-  elements.edit.addEventListener('click', () => {
-    elements.previewStep.hidden = true;
-    elements.nameStep.hidden = false;
-    elements.name.focus();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Back-forward cache keeps the immutable preview; never restore the name form.
+  window.addEventListener('pageshow', () => {
+    if (finalized) {
+      elements.nameStep.hidden = true;
+      elements.previewStep.hidden = false;
+    }
   });
-
-  window.addEventListener('pagehide', releaseCertificateUrl, { once: true });
+  window.addEventListener('pagehide', event => {
+    if (!event.persisted) releaseCertificateUrl();
+  });
   start();
 }
 
