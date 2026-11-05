@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { PORTRAIT_AREA, fitPortraitToArea } from '../public/certificate.js';
 import { normalizeRecipientName, validatePortalHandoff } from '../public/app.js';
 import { createHandoffUrl } from '../public/kiosk-bridge.js';
 
@@ -119,4 +120,29 @@ test('public-facing copy is clear of developer terminology and internal errors',
   assert.match(html, /ศูนย์วิทยาศาสตร์เพื่อการศึกษาขอนแก่น/);
   assert.match(html, /id="confirmNameDialog"/);
   assert.match(script, /คิวอาร์โค้ดนี้หมดอายุหรือใช้งานแล้ว/);
+});
+
+
+test('larger certificate character stays within the lower-left safe zone', () => {
+  assert.ok(PORTRAIT_AREA.x >= 90);
+  assert.ok(PORTRAIT_AREA.y >= 1150);
+  assert.ok(PORTRAIT_AREA.x + PORTRAIT_AREA.width < 700);
+  assert.ok(PORTRAIT_AREA.y + PORTRAIT_AREA.height < 1690);
+  // The last implementation was only 260 pixels tall.
+  assert.ok(PORTRAIT_AREA.height >= 480);
+  for (const [width, height] of [[400, 800], [800, 800], [600, 900]]) {
+    const placement = fitPortraitToArea(width, height);
+    assert.ok(placement.x >= PORTRAIT_AREA.x - 0.001);
+    assert.ok(placement.y >= PORTRAIT_AREA.y - 0.001);
+    assert.ok(placement.x + placement.width <= PORTRAIT_AREA.x + PORTRAIT_AREA.width + 0.001);
+    assert.ok(placement.y + placement.height <= PORTRAIT_AREA.y + PORTRAIT_AREA.height + 0.001);
+  }
+  assert.equal(fitPortraitToArea(0, 800), null);
+});
+
+test('certificate uses the larger portrait renderer instead of old small corner placement', async () => {
+  const script = await readFile(new URL('../public/certificate.js', import.meta.url), 'utf8');
+  assert.match(script, /drawLargePortrait\(ctx, portrait\)/);
+  assert.doesNotMatch(script, /x:\s*1865,\s*y:\s*1260/);
+  assert.match(script, /visiblePortraitBounds/);
 });

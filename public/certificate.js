@@ -65,6 +65,75 @@ function optionalImage(src) {
   });
 }
 
+// Dedicated lower-left safe area. It never crosses the central text or issue date.
+export const PORTRAIT_AREA = Object.freeze({ x: 116, y: 1168, width: 510, height: 508 });
+
+export function fitPortraitToArea(sourceWidth, sourceHeight) {
+  if (!(sourceWidth > 0 && sourceHeight > 0)) return null;
+  const scale = Math.min(PORTRAIT_AREA.width / sourceWidth, PORTRAIT_AREA.height / sourceHeight);
+  const width = sourceWidth * scale;
+  const height = sourceHeight * scale;
+  return {
+    x: PORTRAIT_AREA.x + (PORTRAIT_AREA.width - width) / 2,
+    y: PORTRAIT_AREA.y + PORTRAIT_AREA.height - height,
+    width,
+    height
+  };
+}
+
+// Trim unused transparent padding around uploaded characters without cutting their outline.
+// If the image is opaque, preserve the full image rather than guessing a crop.
+function visiblePortraitBounds(portrait) {
+  const fallback = { x: 0, y: 0, width: portrait.width, height: portrait.height };
+  try {
+    const probe = document.createElement('canvas');
+    probe.width = 128;
+    probe.height = 128;
+    const pctx = probe.getContext('2d', { willReadFrequently: true });
+    if (!pctx) return fallback;
+    pctx.drawImage(portrait, 0, 0, probe.width, probe.height);
+    const pixels = pctx.getImageData(0, 0, probe.width, probe.height).data;
+    let minX = probe.width, minY = probe.height, maxX = -1, maxY = -1, visible = 0;
+    for (let y = 0; y < probe.height; y++) {
+      for (let x = 0; x < probe.width; x++) {
+        if (pixels[(y * probe.width + x) * 4 + 3] < 30) continue;
+        visible++;
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+      }
+    }
+    // Do not crop solid backgrounds or tiny/incomplete silhouettes.
+    if (maxX < 0 || visible > probe.width * probe.height * 0.93) return fallback;
+    const margin = 4;
+    const x = Math.max(0, minX - margin) / probe.width * portrait.width;
+    const y = Math.max(0, minY - margin) / probe.height * portrait.height;
+    const right = Math.min(probe.width, maxX + 1 + margin) / probe.width * portrait.width;
+    const bottom = Math.min(probe.height, maxY + 1 + margin) / probe.height * portrait.height;
+    return { x, y, width: right - x, height: bottom - y };
+  } catch {
+    return fallback;
+  }
+}
+
+function drawLargePortrait(ctx, portrait) {
+  const source = visiblePortraitBounds(portrait);
+  const layout = fitPortraitToArea(source.width, source.height);
+  if (!layout) return;
+
+  // A soft grounding shadow, no rigid box behind the visitor's character.
+  ctx.save();
+  ctx.fillStyle = 'rgba(79, 42, 111, 0.11)';
+  ctx.beginPath();
+  ctx.ellipse(layout.x + layout.width / 2, PORTRAIT_AREA.y + PORTRAIT_AREA.height - 8,
+    Math.min(layout.width * 0.42, 154), 19, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.drawImage(portrait, source.x, source.y, source.width, source.height,
+    layout.x, layout.y, layout.width, layout.height);
+  ctx.restore();
+}
+
 function drawCertificate(ctx, portrait, name, logos, background, date) {
   ctx.fillStyle = '#fefcff';
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -106,12 +175,8 @@ function drawCertificate(ctx, portrait, name, logos, background, date) {
   text(ctx, 'ได้เข้าร่วมกิจกรรมเรียนรู้เรื่องอาหารและสุขภาพ', WIDTH / 2, 1123, 53, '700', PURPLE, 2010);
   text(ctx, 'ขอชื่นชมความตั้งใจในการเรียนรู้และการดูแลสุขภาพของตนเอง', WIDTH / 2, 1200, 34, '500', '#60477b', 1950);
 
-  // Portrait is part of the visitor's kiosk handoff, kept as a small memento.
-  const box = { x: 1865, y: 1260, w: 280, h: 260 };
-  const scale = Math.min(box.w / portrait.width, box.h / portrait.height);
-  const w = portrait.width * scale;
-  const h = portrait.height * scale;
-  ctx.drawImage(portrait, box.x + (box.w - w) / 2, box.y + (box.h - h) / 2, w, h);
+  // Larger 3/4-style character in the lower-left, outside the name and date zones.
+  drawLargePortrait(ctx, portrait);
 
   line(ctx, 820, 1333, 1105, 1333, '#cfaa65', 2);
   line(ctx, 1375, 1333, 1660, 1333, '#cfaa65', 2);
