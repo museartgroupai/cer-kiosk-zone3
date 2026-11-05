@@ -37,7 +37,7 @@ function imageFromDataUrl(dataUrl) {
   });
 }
 
-function drawCertificate(ctx, image, payload, recipientName) {
+function drawCertificate(ctx, image, payload, recipientName, logos = []) {
   ctx.fillStyle = PAPER;
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
   const wash = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
@@ -50,6 +50,13 @@ function drawCertificate(ctx, image, payload, recipientName) {
   roundedRect(ctx, 54, 54, WIDTH - 108, HEIGHT - 108, 24, null, GOLD, 6);
   roundedRect(ctx, 72, 72, WIDTH - 144, HEIGHT - 144, 17, null, '#d9c596', 2);
 
+  // Official organizer logos, kept away from the certificate title and participant.
+  logos.forEach((logo, index) => {
+    if (!logo) return;
+    const size = 156;
+    const x = index === 0 ? 174 : WIDTH - 174 - size;
+    ctx.drawImage(logo, x, 130, size, size);
+  });
   ctx.textAlign = 'center';
   ctx.fillStyle = GREEN;
   ctx.font = '700 44px "Noto Sans Thai", Tahoma, sans-serif';
@@ -109,6 +116,15 @@ function drawCertificate(ctx, image, payload, recipientName) {
   ctx.fillRect(1050, 1510, 380, 3);
 }
 
+function loadLogo(url) {
+  return new Promise(resolve => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => resolve(null); // Certificate remains usable if an asset is unavailable.
+    image.src = url;
+  });
+}
+
 export async function createCertificateBlob(payload, recipientName) {
   if (document.fonts?.ready) await document.fonts.ready;
   const image = await imageFromDataUrl(payload.portraitDataUrl);
@@ -117,7 +133,11 @@ export async function createCertificateBlob(payload, recipientName) {
   canvas.height = HEIGHT;
   const context = canvas.getContext('2d', { alpha: false });
   if (!context) throw new Error('เบราว์เซอร์นี้สร้างภาพใบประกาศไม่ได้');
-  drawCertificate(context, image, payload, recipientName);
+  const logos = await Promise.all([
+    loadLogo('/logos/learning-encouragement.webp'),
+    loadLogo('/logos/science-education.webp')
+  ]);
+  drawCertificate(context, image, payload, recipientName, logos);
   return new Promise((resolve, reject) => {
     canvas.toBlob(blob => blob
       ? resolve(blob)
