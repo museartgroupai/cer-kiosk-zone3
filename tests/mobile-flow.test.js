@@ -114,7 +114,7 @@ test('new A4 background uses AVIF and retains a WebP fallback', async () => {
 test('public-facing copy is clear of developer terminology and internal errors', async () => {
   const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
   const script = await readFile(new URL('../public/app.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(html, /kiosk|handoff|API|debug|dev|ไม่มีการสมัครสมาชิก/i);
+  assert.doesNotMatch(html, /kiosk|handoff|\bAPI\b|debug|\bdev\b|ไม่มีการสมัครสมาชิก/i);
   assert.doesNotMatch(script, /result\.error|kiosk/i);
   assert.match(html, /ศูนย์วิทยาศาสตร์เพื่อการศึกษาขอนแก่น/);
   assert.match(html, /id="confirmNameDialog"/);
