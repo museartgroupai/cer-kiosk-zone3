@@ -18,22 +18,22 @@
         <img src="/logos/science-education.webp" width="56" height="56" alt="ศูนย์วิทยาศาสตร์เพื่อการศึกษาขอนแก่น">
       </div>
       <div>
-        <p class="brand-kicker">กรมส่งเสริมการเรียนรู้ · FOOD &amp; FIT</p>
+        <p class="brand-kicker">กรมส่งเสริมการเรียนรู้</p>
         <p class="brand-name">ศูนย์วิทยาศาสตร์เพื่อการศึกษาขอนแก่น</p>
       </div>
     </header>
 
     <section id="loading" class="panel state-panel" aria-live="polite">
       <span class="loader" aria-hidden="true"></span>
-      <h1>กำลังเตรียมใบประกาศ</h1>
-      <p>กำลังเตรียมข้อมูลกิจกรรมของคุณ</p>
+      <h1>กำลังเตรียมเกียรติบัตร</h1>
+      <p>อีกสักครู่เกียรติบัตรของคุณจะพร้อม</p>
     </section>
 
     <section id="errorStep" class="panel state-panel" hidden>
       <span class="state-icon state-icon-warning" aria-hidden="true">!</span>
       <h1 id="errorTitle">เปิดข้อมูลไม่สำเร็จ</h1>
-      <p id="errorMessage">กรุณาสแกน QR จาก kiosk อีกครั้ง</p>
-      <button id="rescanButton" class="button button-primary" type="button">สแกน QR ใหม่</button>
+      <p id="errorMessage">กรุณาสแกนคิวอาร์โค้ดที่หน้าจอกิจกรรมอีกครั้ง</p>
+      <button id="rescanButton" class="button button-primary" type="button">สแกนอีกครั้ง</button>
     </section>
 
     <section id="nameStep" class="panel" hidden>
@@ -51,7 +51,7 @@
 
       <div class="participant-card">
         <div class="portrait-frame">
-          <img id="characterPreview" alt="ตัวละครที่คุณสร้างจาก kiosk">
+          <img id="characterPreview" alt="ตัวละครของคุณ">
         </div>
         <div class="result-summary">
           <span class="summary-label">ผลกิจกรรมวันนี้</span>
@@ -61,10 +61,10 @@
       </div>
 
       <form id="nameForm" class="name-form" novalidate>
-        <label for="recipientName">ชื่อบนใบประกาศ</label>
+        <label for="recipientName">ชื่อบนเกียรติบัตร</label>
         <input id="recipientName" name="recipientName" type="text" inputmode="text" autocomplete="name" enterkeyhint="done" maxlength="60" placeholder="เช่น เด็กชายต้นกล้า" aria-describedby="nameHint nameError">
         <p id="nameHint" class="field-hint">ใช้ชื่อจริงหรือชื่อเล่นก็ได้ ไม่เกิน 60 ตัวอักษร</p>
-        <p class="name-lock-note">เมื่อยืนยันแล้วจะไม่สามารถย้อนกลับมาเปลี่ยนชื่อได้</p>
+        <p class="name-lock-note">กรุณาตรวจสอบชื่อให้ถูกต้องก่อนยืนยัน</p>
         <p id="nameError" class="field-error" role="alert" hidden></p>
         <button id="confirmNameButton" class="button button-primary" type="submit">ตรวจสอบและยืนยันชื่อ</button>
       </form>
@@ -79,7 +79,7 @@
           <button id="finalizeNameButton" class="button button-primary" type="button">ยืนยันและออกเกียรติบัตร</button>
         </div>
       </dialog>
-      <p class="privacy-note">ข้อมูลชื่ออยู่บนอุปกรณ์ของคุณเท่านั้น ไม่ส่งกลับไปยัง kiosk</p>
+      
     </section>
 
     <section id="previewStep" class="panel preview-panel" hidden>
@@ -100,13 +100,9 @@
         <button id="shareButton" class="button button-secondary" type="button">แชร์เกียรติบัตร</button>
       </div>
       <p id="actionStatus" class="action-status" role="status" aria-live="polite"></p>
-      <p class="privacy-note">ออกเกียรติบัตรเรียบร้อยแล้ว · ไม่สามารถแก้ไขชื่อย้อนหลังได้</p>
+      
     </section>
 
-    <footer class="portal-footer">
-      <span>ศูนย์วิทยาศาสตร์เพื่อการศึกษาขอนแก่น</span>
-      <span>ไม่มีการสมัครสมาชิก</span>
-    </footer>
   </main>
   <img id="printSheet" class="print-sheet" alt="เกียรติบัตรสำหรับพิมพ์หรือบันทึกเป็น PDF">
 </body>

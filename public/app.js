@@ -86,7 +86,7 @@ export function bootCertificatePortal(elements = getElements()) {
     const handoffId = params.get('h') || '';
     history.replaceState({}, '', window.location.pathname);
     if (!/^[a-f0-9]{32}$/.test(handoffId)) {
-      showError(elements, 'สแกน QR จาก kiosk', 'เปิดลิงก์จาก QR บนหน้าจอ kiosk เพื่อรับตัวละครและทำใบประกาศ');
+      showError(elements, 'เริ่มรับเกียรติบัตร', 'กรุณาสแกนคิวอาร์โค้ดจากหน้าจอกิจกรรม');
       return;
     }
 
@@ -97,7 +97,10 @@ export function bootCertificatePortal(elements = getElements()) {
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !validatePortalHandoff(result).ok) {
-        throw new Error(result.error || 'QR นี้หมดอายุหรือถูกใช้แล้ว กรุณาสแกน QR ใหม่จาก kiosk');
+        // Keep internal service errors off the visitor's screen.
+        throw new Error(response.status === 404 || response.status === 410
+          ? 'คิวอาร์โค้ดนี้หมดอายุหรือใช้งานแล้ว กรุณาสแกนใหม่'
+          : 'ไม่สามารถเปิดเกียรติบัตรได้ กรุณาลองอีกครั้ง');
       }
       payload = result;
       elements.portrait.src = payload.portraitDataUrl;
@@ -106,13 +109,20 @@ export function bootCertificatePortal(elements = getElements()) {
       elements.loading.hidden = true;
       elements.nameStep.hidden = false;
     } catch (error) {
-      showError(elements, 'รับตัวละครไม่สำเร็จ', error.message || 'กรุณาสแกน QR ใหม่จาก kiosk');
+      const knownMessages = new Set([
+        'คิวอาร์โค้ดนี้หมดอายุหรือใช้งานแล้ว กรุณาสแกนใหม่',
+        'ไม่สามารถเปิดเกียรติบัตรได้ กรุณาลองอีกครั้ง'
+      ]);
+      const message = knownMessages.has(error?.message)
+        ? error.message
+        : 'ไม่สามารถเชื่อมต่อได้ กรุณาลองอีกครั้ง';
+      showError(elements, 'เปิดเกียรติบัตรไม่สำเร็จ', message);
     }
   };
 
   elements.rescanButton.addEventListener('click', () => {
     history.replaceState({}, '', window.location.pathname);
-    showError(elements, 'พร้อมสแกนใหม่', 'เปิดกล้องมือถือแล้วสแกน QR ที่แสดงบน kiosk');
+    showError(elements, 'สแกนอีกครั้ง', 'เปิดกล้องแล้วสแกนคิวอาร์โค้ดที่หน้าจอกิจกรรม');
   });
 
   // The visitor may correct the spelling only before the final confirmation.
@@ -121,7 +131,7 @@ export function bootCertificatePortal(elements = getElements()) {
     if (finalized || generating || !payload) return;
     const name = normalizeRecipientName(elements.name.value);
     if (!name) {
-      elements.nameError.textContent = 'กรุณาพิมพ์ชื่อบนใบประกาศ';
+      elements.nameError.textContent = 'กรุณากรอกชื่อบนเกียรติบัตร';
       elements.nameError.hidden = false;
       elements.name.focus();
       return;
@@ -140,7 +150,7 @@ export function bootCertificatePortal(elements = getElements()) {
     const name = normalizeRecipientName(elements.name.value);
     if (!name) {
       elements.confirmDialog.close();
-      elements.nameError.textContent = 'กรุณาพิมพ์ชื่อบนใบประกาศ';
+      elements.nameError.textContent = 'กรุณากรอกชื่อบนเกียรติบัตร';
       elements.nameError.hidden = false;
       return;
     }
@@ -167,7 +177,7 @@ export function bootCertificatePortal(elements = getElements()) {
       elements.status.textContent = '';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-      elements.nameError.textContent = error.message || 'สร้างเกียรติบัตรไม่สำเร็จ กรุณาลองอีกครั้ง';
+      elements.nameError.textContent = 'สร้างเกียรติบัตรไม่สำเร็จ กรุณาลองอีกครั้ง';
       elements.nameError.hidden = false;
     } finally {
       generating = false;
@@ -188,7 +198,7 @@ export function bootCertificatePortal(elements = getElements()) {
 
   elements.pdf.addEventListener('click', () => {
     if (!certificateBlob) return;
-    elements.status.textContent = 'เลือก “บันทึกเป็น PDF” ในหน้าต่างพิมพ์';
+    elements.status.textContent = 'เลือกบันทึกเป็น PDF เพื่อเก็บเกียรติบัตร';
     window.setTimeout(() => window.print(), 100);
   });
 
@@ -202,7 +212,7 @@ export function bootCertificatePortal(elements = getElements()) {
         elements.status.textContent = 'แชร์เกียรติบัตรแล้ว';
       } else {
         elements.download.click();
-        elements.status.textContent = 'เบราว์เซอร์นี้ไม่รองรับเมนูแชร์ จึงดาวน์โหลดภาพให้แทน';
+        elements.status.textContent = 'บันทึกเกียรติบัตรให้แล้ว สามารถแชร์จากรูปภาพได้';
       }
     } catch (error) {
       if (error.name !== 'AbortError') elements.status.textContent = 'แชร์ไม่สำเร็จ ลองดาวน์โหลดภาพแทนได้';
