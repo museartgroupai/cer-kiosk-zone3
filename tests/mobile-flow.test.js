@@ -99,3 +99,13 @@ test('certificate background is text-free and signature-free; center and date re
   assert.doesNotMatch(source, /'ผู้จัดกิจกรรม'/);
   assert.doesNotMatch(source, /'ผู้อำนวยการ'/);
 });
+
+test('new A4 background uses AVIF and retains a WebP fallback', async () => {
+  const script = await readFile(new URL('../public/certificate.js', import.meta.url), 'utf8');
+  const image = await readFile(new URL('../public/certificate-background.avif', import.meta.url));
+  assert.ok(image.length > 7000);
+  assert.equal(image.toString('ascii', 4, 8), 'ftyp');
+  assert.equal(image.toString('ascii', 8, 12), 'avif');
+  assert.ok(script.includes("optionalImage('/certificate-background.avif')"));
+  assert.ok(script.includes("optionalImage('/certificate-background.webp')"));
+});

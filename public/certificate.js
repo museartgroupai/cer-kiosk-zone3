@@ -124,7 +124,9 @@ export async function createCertificateBlob(payload, recipientName) {
   if (document.fonts?.ready) await document.fonts.ready;
   const [portrait, background, logo1, logo2] = await Promise.all([
     loadImage(payload.portraitDataUrl),
-    optionalImage('/certificate-background.webp'),
+    // Prefer the newly generated high-resolution background. Keep WebP as a legacy fallback.
+    optionalImage('/certificate-background.avif').then(image =>
+      image ? image : optionalImage('/certificate-background.webp')),
     optionalImage('/logos/learning-encouragement.webp'),
     optionalImage('/logos/science-education.webp')
   ]);
